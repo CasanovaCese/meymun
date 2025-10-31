@@ -52,7 +52,7 @@ async function getLatestPin(username) {
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
-    ...
+    
 }
 
 
@@ -144,6 +144,7 @@ client.once('ready', () => {
 });
 
 client.login(process.env.TOKEN);
+
 
 
 
