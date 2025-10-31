@@ -1,6 +1,7 @@
 // index.js
 const { Client, GatewayIntentBits } = require('discord.js');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const chromium = require('@sparticuz/chromium');
 const fs = require('fs');
 
 // Railway ortam değişkeninden token al
@@ -8,7 +9,7 @@ const BOT_TOKEN = process.env.TOKEN;
 if (!BOT_TOKEN) throw new Error("Bot tokeni bulunamadı! Railway ortam değişkenini kontrol et.");
 
 const CHANNEL_ID = "1431017351272333424";   // Discord kanal ID
-const CHECK_INTERVAL = 10 * 1000;           // 10 saniye aralıkla kontrol
+const CHECK_INTERVAL = 60 * 1000;           // 1 dakika aralıkla kontrol
 const USERS_FILE = './users.json';          // Kullanıcıları kaydedeceğimiz dosya
 
 // Başlangıçta users.json varsa oku, yoksa boş liste oluştur
@@ -57,11 +58,18 @@ function removeUser(username) {
 
 // Pinterest'ten en son pin
 async function getLatestPin(username) {
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-
+    let browser;
     try {
+        browser = await puppeteer.launch({
+            args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox"],
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath(),
+            headless: chromium.headless,
+        });
+
+        const page = await browser.newPage();
         await page.goto(`https://www.pinterest.com/${username}/_created/`, { waitUntil: 'networkidle2' });
+        await page.waitForSelector('div[data-test-id="pin"] img', { timeout: 15000 });
 
         const pins = await page.$$eval('div[data-test-id="pin"] img', imgs => {
             for (const i of imgs) {
@@ -70,81 +78,25 @@ async function getLatestPin(username) {
             return [];
         });
 
-        await browser.close();
-
         if (pins.length === 0) return null;
         return pins[0];
-
     } catch (err) {
         console.error("Pinterest pin çekme hatası:", err);
-        await browser.close();
         return null;
+    } finally {
+        if (browser) await browser.close();
     }
 }
 
 // Pinleri kontrol et ve gönder
 async function checkPins() {
-    const channel = await client.channels.fetch(CHANNEL_ID);
+    try {
+        const channel = await client.channels.fetch(CHANNEL_ID);
 
-    for (const user of USERS) {
-        const pinURL = await getLatestPin(user);
-        if (!pinURL) continue;
+        for (const user of USERS) {
+            const pinURL = await getLatestPin(user);
+            if
 
-        if (!sentPins[user]) sentPins[user] = new Set();
-        if (sentPins[user].has(pinURL)) continue;
-
-        sentPins[user].add(pinURL);
-
-        try {
-            await channel.send({ content: `Yeni pin: ${user}`, files: [pinURL] });
-            console.log(`Pin gönderildi: ${pinURL}`);
-        } catch (err) {
-            console.error("Pin gönderme hatası:", err);
-        }
-    }
-}
-
-// Komutlar için mesaj dinle
-client.on('messageCreate', message => {
-    if (!message.content.startsWith('!') || message.author.bot) return;
-
-    const args = message.content.slice(1).trim().split(/ +/);
-    const command = args.shift().toLowerCase();
-
-    if (command === 'adduser') {
-        const newUser = args[0];
-        if (!newUser) return message.reply('Kullanıcı adı belirtmelisin!');
-        if (addUser(newUser)) {
-            message.reply(`Kullanıcı eklendi: ${newUser}`);
-        } else {
-            message.reply('Bu kullanıcı zaten listede.');
-        }
-    }
-
-    if (command === 'removeuser') {
-        const removeUserName = args[0];
-        if (!removeUserName) return message.reply('Kullanıcı adı belirtmelisin!');
-        if (removeUser(removeUserName)) {
-            message.reply(`Kullanıcı kaldırıldı: ${removeUserName}`);
-        } else {
-            message.reply('Bu kullanıcı listede yok.');
-        }
-    }
-
-    if (command === 'listusers') {
-        message.reply(`Mevcut kullanıcılar: ${USERS.join(', ')}`);
-    }
-});
-
-// Bot hazır olduğunda başlat
-client.once('ready', () => {  // v14 için ready
-    console.log(`Bot hazır: ${client.user.tag}`);
-    checkPins();
-    setInterval(checkPins, CHECK_INTERVAL);
-});
-
-// Discord login
-client.login(BOT_TOKEN);
 
 
 
