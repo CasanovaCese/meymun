@@ -45,11 +45,16 @@ function removeUser(username) {
     }
     return false;
 }
-
 // Pinterest'ten en son pin
 async function getLatestPin(username) {
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
     const page = await browser.newPage();
+    ...
+}
+
 
     try {
         await page.goto(`https://www.pinterest.com/${username}/_created/`, { waitUntil: 'networkidle2' });
@@ -139,5 +144,6 @@ client.once('ready', () => {
 });
 
 client.login(process.env.TOKEN);
+
 
 
