@@ -64,12 +64,8 @@ async function getLatestPin(username) {
         await page.goto(`https://www.pinterest.com/${username}/_created/`, { waitUntil: 'networkidle2' });
 
         const pins = await page.$$eval('div[data-test-id="pin"] img', imgs => {
-            const seen = new Set();
             for (const i of imgs) {
-                if (!seen.has(i.src)) {
-                    seen.add(i.src);
-                    return [i.src]; // sadece ilk benzersiz pin
-                }
+                if (i.src) return [i.src]; // sadece ilk pin
             }
             return [];
         });
@@ -141,7 +137,7 @@ client.on('messageCreate', message => {
 });
 
 // Bot hazır olduğunda başlat
-client.once('clientReady', () => { // v15+ için clientReady
+client.once('ready', () => {  // v14 için ready
     console.log(`Bot hazır: ${client.user.tag}`);
     checkPins();
     setInterval(checkPins, CHECK_INTERVAL);
@@ -149,7 +145,6 @@ client.once('clientReady', () => { // v15+ için clientReady
 
 // Discord login
 client.login(BOT_TOKEN);
-
 
 
 
