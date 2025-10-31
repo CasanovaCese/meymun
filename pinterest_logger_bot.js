@@ -2,10 +2,9 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
-const BOT_TOKEN = "BOT_TOKENINIZ";   // Discord bot token
 const CHANNEL_ID = "1431017351272333424";   // Discord kanal ID
-const CHECK_INTERVAL = 10 * 1000;     // 10 saniye aralıkla kontrol
-const USERS_FILE = './users.json';    // Kullanıcıları kaydedeceğimiz dosya
+const CHECK_INTERVAL = 10 * 1000;           // 10 saniye aralıkla kontrol
+const USERS_FILE = './users.json';          // Kullanıcıları kaydedeceğimiz dosya
 
 // Başlangıçta users.json varsa oku, yoksa boş liste oluştur
 let USERS = [];
@@ -45,16 +44,15 @@ function removeUser(username) {
     }
     return false;
 }
-// Pinterest'ten en son pin
+
+// ✅ Pinterest'ten en son pin alma fonksiyonu (DÜZGÜN HALİ)
 async function getLatestPin(username) {
     const browser = await puppeteer.launch({
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
-    const page = await browser.newPage();
-    
-}
 
+    const page = await browser.newPage();
 
     try {
         await page.goto(`https://www.pinterest.com/${username}/_created/`, { waitUntil: 'networkidle2' });
@@ -82,7 +80,7 @@ async function getLatestPin(username) {
     }
 }
 
-// Pinleri kontrol et ve gönder
+// ✅ Pinleri kontrol et ve gönder
 async function checkPins() {
     const channel = await client.channels.fetch(CHANNEL_ID);
 
@@ -104,7 +102,7 @@ async function checkPins() {
     }
 }
 
-// Komutlar için mesaj dinle
+// ✅ Komutlar
 client.on('messageCreate', message => {
     if (!message.content.startsWith('!') || message.author.bot) return;
 
@@ -136,15 +134,15 @@ client.on('messageCreate', message => {
     }
 });
 
-// Bot hazır olduğunda başlat
+// ✅ Botu başlat
 client.once('ready', () => {
     console.log(`Bot hazır: ${client.user.tag}`);
     checkPins();
     setInterval(checkPins, CHECK_INTERVAL);
 });
 
+// ✅ Login
 client.login(process.env.TOKEN);
-
 
 
 
