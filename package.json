@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "discord.js": "^14.14.0",
-    "puppeteer": "^21.3.8",
-    "fs": "^0.0.1-security"
+    "puppeteer-core": "^21.3.8",
+    "@sparticuz/chromium": "^2.3.0"
   }
 }
