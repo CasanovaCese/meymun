@@ -138,4 +138,6 @@ client.once('ready', () => {
     setInterval(checkPins, CHECK_INTERVAL);
 });
 
-client.login("MTQzMTAxOTE3ODQwNzQ5NzgzOQ.Gw6kWz.ppKmBAbwB4DXy2oxLCmQLATKmhFi97teHRBBv4");
+client.login(process.env.TOKEN);
+
+
