@@ -1,6 +1,6 @@
 const { Client, GatewayIntentBits } = require('discord.js');
-const fetch = require('node-fetch'); // HTTP istekleri için
-const express = require('express');  // Keep-alive için
+const fetch = require('node-fetch');  // node-fetch v2
+const express = require('express');   // Keep-alive için
 const fs = require('fs');
 
 const BOT_TOKEN = process.env.TOKEN;
@@ -53,15 +53,24 @@ function removeUser(username) {
     return false;
 }
 
-// Pinterest'ten en son pin (JSON API ile)
+// Pinterest'ten en son pin (güvenli JSON okuma)
 async function getLatestPin(username) {
     try {
         const res = await fetch(`https://api.pinterest.com/v3/pidgets/users/${username}/pins/`);
         const data = await res.json();
-        if (!data || !data.data || !data.data.pins || data.data.pins.length === 0) return null;
-        return data.data.pins[0].images.orig.url;
+
+        const pin = data?.data?.pins?.[0];
+        const url = pin?.images?.orig?.url;
+
+        if (!url) {
+            console.log(`Pin bulunamadı: ${username}`);
+            return null;
+        }
+
+        return url;
+
     } catch (err) {
-        console.error("Pinterest pin çekme hatası:", err);
+        console.error(`Pinterest pin çekme hatası (${username}):`, err);
         return null;
     }
 }
@@ -126,5 +135,7 @@ client.login(BOT_TOKEN);
 const app = express();
 app.get("/", (req, res) => res.send("Pinterest Bot Çalışıyor ✅"));
 app.listen(3000, () => console.log("Keep-alive aktif!"));
+
+
 
 
