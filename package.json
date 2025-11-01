@@ -1,5 +1,5 @@
 {
-  "name": "pinterest-logger-bot",
+  "name": "pinterest-fast-bot",
   "version": "1.0.0",
   "main": "index.js",
   "type": "commonjs",
@@ -8,7 +8,8 @@
   },
   "dependencies": {
     "discord.js": "^14.14.0",
-    "puppeteer-core": "^21.3.8",
-    "@sparticuz/chromium": "^2.3.0"
+    "node-fetch": "^3.4.1",
+    "express": "^4.18.2",
+    "fs": "^0.0.1-security"
   }
 }
